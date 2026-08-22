@@ -13,7 +13,17 @@ const isAllowedOrigin = (origin) => {
         return true;
     }
 
-    return /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+    if (/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)) {
+        return true;
+    }
+
+    if (process.env.FRONTEND_URL === origin) {
+        return true;
+    }
+
+    return Boolean(
+        process.env.VERCEL && /^https:\/\/([a-z0-9-]+\.)?vercel\.app$/.test(origin)
+    );
 };
 
 app.use(cors({
@@ -39,6 +49,15 @@ const {
 
 app.use(express.json());
 
+app.use('/api', async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
+
 app.get('/', (req, res) => {
     res.send('Server is running');
 });
@@ -58,12 +77,16 @@ app.use((error, req, res, next) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
+if (!process.env.VERCEL) {
+    const PORT = process.env.PORT || 5000;
 
-connectDB().catch((error) => {
-    console.error('MongoDB connection failed:', error.message);
-});
+    connectDB().catch((error) => {
+        console.error('MongoDB connection failed:', error.message);
+    });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+
+module.exports = app;

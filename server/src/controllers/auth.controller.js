@@ -9,7 +9,7 @@ const {
 const cookieOptions = {
     httpOnly: true,
     sameSite: 'lax',
-    secure: false
+    secure: Boolean(process.env.VERCEL)
 };
 
 const authCookieOptions = {

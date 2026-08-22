@@ -3,7 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 const projectRoot = path.resolve(__dirname, '../../..');
-const extractedFolder = path.join(projectRoot, 'extracted');
+const runtimeRoot = process.env.VERCEL
+    ? path.join('/tmp', 'documind-ai')
+    : projectRoot;
+const extractedFolder = path.join(runtimeRoot, 'extracted');
 
 const extractArchive = (filePath) => {
     const zip = new AdmZip(filePath);

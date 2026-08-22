@@ -5,7 +5,10 @@ const fs = require('fs');
 
 const router = express.Router();
 const projectRoot = path.resolve(__dirname, '../../..');
-const uploadsFolder = path.join(projectRoot, 'uploads');
+const runtimeRoot = process.env.VERCEL
+    ? path.join('/tmp', 'documind-ai')
+    : projectRoot;
+const uploadsFolder = path.join(runtimeRoot, 'uploads');
 
 const { uploadFile } =
     require('../controllers/upload.controller');
