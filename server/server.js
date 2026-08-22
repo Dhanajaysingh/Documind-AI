@@ -3,18 +3,22 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const {
+    connectDB
+} = require('./src/config/db');
 
 const app = express();
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174'
-];
+const isAllowedOrigin = (origin) => {
+    if (!origin) {
+        return true;
+    }
+
+    return /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+};
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (isAllowedOrigin(origin)) {
             return callback(null, true);
         }
 
@@ -54,6 +58,12 @@ app.use((error, req, res, next) => {
     });
 });
 
-app.listen(5000, () => {
-  console.log('Server is running on port 5000');
+const PORT = process.env.PORT || 5000;
+
+connectDB().catch((error) => {
+    console.error('MongoDB connection failed:', error.message);
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

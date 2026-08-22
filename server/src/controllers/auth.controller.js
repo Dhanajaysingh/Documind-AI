@@ -62,7 +62,7 @@ const register = async (req, res) => {
         });
     }
 
-    const existingUser = findUserByEmail(email);
+    const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
         return res.status(409).json({
@@ -72,7 +72,7 @@ const register = async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = createUser({
+    const user = await createUser({
         name,
         email,
         passwordHash
@@ -97,7 +97,7 @@ const login = async (req, res) => {
         });
     }
 
-    const user = findUserByEmail(email);
+    const user = await findUserByEmail(email);
 
     if (!user) {
         return res.status(401).json({
@@ -123,7 +123,7 @@ const login = async (req, res) => {
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = async (req, res) => {
     const token = req.cookies.token;
 
     if (!token) {
@@ -135,7 +135,7 @@ const getCurrentUser = (req, res) => {
 
     try {
         const decoded = jwt.verify(token, getJwtSecret());
-        const user = findUserById(decoded.userId);
+        const user = await findUserById(decoded.userId);
 
         if (!user) {
             return res.status(401).json({

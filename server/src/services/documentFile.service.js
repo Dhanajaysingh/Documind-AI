@@ -1,20 +1,24 @@
-const fs = require('fs');
 const path = require('path');
+const Document = require('../models/document.model');
 
-const docsFolder = 'generated-docs';
+const saveDocumentationFile = async ({
+    userId,
+    originalName,
+    documentation
+}) => {
+    const parsedName = path.parse(originalName);
+    const fileName = `${parsedName.name}.md`;
+    const size = Buffer.byteLength(documentation, 'utf-8');
 
-const saveDocumentationFile = (uploadedFileName, documentation) => {
-    if (!fs.existsSync(docsFolder)) {
-        fs.mkdirSync(docsFolder);
-    }
+    const document = await Document.create({
+        userId,
+        fileName,
+        originalName,
+        documentation,
+        size
+    });
 
-    const parsedName = path.parse(uploadedFileName);
-    const documentName = `${parsedName.name}.md`;
-    const documentPath = path.join(docsFolder, documentName);
-
-    fs.writeFileSync(documentPath, documentation, 'utf-8');
-
-    return documentPath;
+    return document;
 };
 
 module.exports = {

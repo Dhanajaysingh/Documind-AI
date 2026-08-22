@@ -1,27 +1,35 @@
-const fs = require('fs');
 const path = require('path');
+const Document = require('../models/document.model');
 
-const docsFolder = path.resolve('generated-docs');
-
-const getDocumentPath = (fileName) => {
+const getSafeFileName = (fileName) => {
     const safeFileName = path.basename(fileName);
-    const documentPath = path.resolve(docsFolder, safeFileName);
 
-    if (!documentPath.startsWith(docsFolder)) {
+    if (path.extname(safeFileName) !== '.md') {
         return null;
     }
 
-    if (path.extname(documentPath) !== '.md') {
-        return null;
-    }
-
-    return documentPath;
+    return safeFileName;
 };
 
-const viewDocumentation = (req, res) => {
-    const documentPath = getDocumentPath(req.params.fileName);
+const findUserDocument = async (req) => {
+    const fileName = getSafeFileName(req.params.fileName);
 
-    if (!documentPath || !fs.existsSync(documentPath)) {
+    if (!fileName) {
+        return null;
+    }
+
+    return Document.findOne({
+        userId: req.user.id,
+        fileName
+    }).sort({
+        createdAt: -1
+    });
+};
+
+const viewDocumentation = async (req, res) => {
+    const document = await findUserDocument(req);
+
+    if (!document) {
         return res.status(404).json({
             success: false,
             message: "Documentation file not found"
@@ -29,54 +37,47 @@ const viewDocumentation = (req, res) => {
     }
 
     res.type('text/markdown');
-    res.sendFile(documentPath);
+    res.send(document.documentation);
 };
 
-const listDocumentation = (req, res) => {
-    if (!fs.existsSync(docsFolder)) {
-        return res.json({
-            success: true,
-            documents: []
-        });
-    }
-
-    const documents = fs.readdirSync(docsFolder)
-        .filter((fileName) => path.extname(fileName) === '.md')
-        .map((fileName) => {
-            const documentPath = path.join(docsFolder, fileName);
-            const stats = fs.statSync(documentPath);
-
-            return {
-                fileName,
-                size: stats.size,
-                createdAt: stats.birthtime,
-                viewUrl: `/api/docs/${fileName}`,
-                downloadUrl: `/api/docs/download/${fileName}`
-            };
-        })
-        .sort((first, second) => {
-            return new Date(second.createdAt) - new Date(first.createdAt);
-        });
+const listDocumentation = async (req, res) => {
+    const documents = await Document.find({
+        userId: req.user.id
+    }).sort({
+        createdAt: -1
+    });
 
     res.json({
         success: true,
-        documents
+        documents: documents.map((document) => ({
+            id: document.id,
+            fileName: document.fileName,
+            originalName: document.originalName,
+            size: document.size,
+            createdAt: document.createdAt,
+            viewUrl: `/api/docs/${document.fileName}`,
+            downloadUrl: `/api/docs/download/${document.fileName}`
+        }))
     });
 };
 
-const downloadDocumentation = (req, res) => {
-    const documentPath = getDocumentPath(req.params.fileName);
+const downloadDocumentation = async (req, res) => {
+    const document = await findUserDocument(req);
 
-    if (!documentPath || !fs.existsSync(documentPath)) {
+    if (!document) {
         return res.status(404).json({
             success: false,
             message: "Documentation file not found"
         });
     }
 
-    const fileName = path.basename(documentPath);
+    res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${document.fileName}"`
+    );
+    res.type('text/markdown');
 
-    res.download(documentPath, fileName);
+    res.send(document.documentation);
 };
 
 module.exports = {

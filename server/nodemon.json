@@ -1,0 +1,8 @@
+{
+  "ignore": [
+    "uploads",
+    "extracted",
+    "generated-docs",
+    "data"
+  ]
+}

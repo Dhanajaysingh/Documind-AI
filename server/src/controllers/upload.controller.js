@@ -4,7 +4,6 @@ const { scanCodeFiles, readCodeFiles } = require('../services/codeScanner.servic
 const { buildDocumentationPrompt } = require('../services/documentation.service');
 const { generateDocumentation } = require('../services/ai.service');
 const { saveDocumentationFile } = require('../services/documentFile.service');
-const path = require('path');
 
 const uploadFile = async (req, res) => {
     if (!req.file) {
@@ -41,13 +40,14 @@ const uploadFile = async (req, res) => {
         const documentation = await generateDocumentation(documentationPrompt);
         console.log('Documentation generated');
 
-        const documentationPath = saveDocumentationFile(
-            req.file.filename,
+        const savedDocument = await saveDocumentationFile({
+            userId: req.user.id,
+            originalName: req.file.originalname,
             documentation
-        );
-        console.log('Documentation saved:', documentationPath);
+        });
+        console.log('Documentation saved:', savedDocument.fileName);
 
-        const documentationFileName = path.basename(documentationPath);
+        const documentationFileName = savedDocument.fileName;
 
         res.json({
             success: true,
@@ -67,7 +67,8 @@ const uploadFile = async (req, res) => {
                 path: file.path,
                 size: file.size
             })),
-            documentationPath,
+            documentId: savedDocument.id,
+            documentationPath: documentationFileName,
             documentationUrl: `/api/docs/${documentationFileName}`,
             documentationDownloadUrl: `/api/docs/download/${documentationFileName}`,
             documentation

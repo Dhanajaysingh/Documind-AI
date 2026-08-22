@@ -5,7 +5,7 @@ const getJwtSecret = () => {
     return process.env.JWT_SECRET || 'documind-dev-secret';
 };
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
     const token = req.cookies.token;
 
     if (!token) {
@@ -17,7 +17,7 @@ const authMiddleware = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, getJwtSecret());
-        const user = findUserById(decoded.userId);
+        const user = await findUserById(decoded.userId);
 
         if (!user) {
             return res.status(401).json({

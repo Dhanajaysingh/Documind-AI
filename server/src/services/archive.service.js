@@ -2,7 +2,8 @@ const AdmZip = require('adm-zip');
 const fs = require('fs');
 const path = require('path');
 
-const extractedFolder = path.resolve('extracted');
+const projectRoot = path.resolve(__dirname, '../../..');
+const extractedFolder = path.join(projectRoot, 'extracted');
 
 const extractArchive = (filePath) => {
     const zip = new AdmZip(filePath);

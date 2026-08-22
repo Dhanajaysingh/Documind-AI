@@ -4,7 +4,8 @@ const path = require('path');
 const fs = require('fs');
 
 const router = express.Router();
-const uploadsFolder = path.resolve('uploads');
+const projectRoot = path.resolve(__dirname, '../../..');
+const uploadsFolder = path.join(projectRoot, 'uploads');
 
 const { uploadFile } =
     require('../controllers/upload.controller');
