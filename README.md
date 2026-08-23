@@ -78,7 +78,7 @@ The application is deployed using Vercel with MongoDB Atlas as the persistent da
                              │
                              ▼
                     ┌─────────────────┐
-                    │ Upload API      │
+                    │   Upload API    │
                     │ Express + Multer│
                     └────────┬────────┘
                              │
@@ -96,19 +96,24 @@ The application is deployed using Vercel with MongoDB Atlas as the persistent da
                              │
                              ▼
                     ┌─────────────────┐
-                    │ Gemini AI       │
-                    │ Code Analysis   │
+                    │    Gemini AI    │
+                    │  Code Analysis  │
                     └────────┬────────┘
                              │
                              ▼
                     ┌─────────────────┐
                     │ Markdown Docs   │
-                    │ Generation      │
+                    │   Generation    │
                     └────────┬────────┘
                              │
                              ▼
                     ┌─────────────────┐
-                    │ MongoDB Atlas   │
+                    │  MongoDB Atlas  │
                     │ Document Store  │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │    Dashboard    │
+                    │ View / Download │
                     └─────────────────┘
-
