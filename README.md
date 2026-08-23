@@ -111,8 +111,8 @@ The application is deployed using Vercel with MongoDB Atlas as the persistent da
                     │ MongoDB Atlas   │
                     │ Document Store  │
                     └─────────────────┘
-🛠️ Tech Stack
-Frontend
+## 🛠️ Tech Stack
+```text Frontend
 React
 Vite
 CSS
